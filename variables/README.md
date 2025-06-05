@@ -12,11 +12,11 @@ https://drive.google.com/drive/folders/13ENit3NzjQ8nZb11pIet4NIscoZD0vE1?usp=sha
 
 ## LU_change
 
-Contains land use and vegetation type data.
+Contains land use and vegetation type data. Represents the summed tree Plant Functional Types (PFT) for the year 2020.
 
 File:
 - tree_PFT_sum_2020.tif  
-Represents the summed tree Plant Functional Types (PFT) for the year 2020.
+
 
 ## climate_extremes
 
@@ -29,11 +29,11 @@ Files:
 
 ## travel_time
 
-Contains data on geographic accessibility.
+Contains data on geographic accessibility. Represents estimated travel time to the nearest city (in minutes) for the year 2015.
 
 File:
 - Accessibility2015.tif  
-Description: Represents estimated travel time to the nearest city (in minutes) for the year 2015.
+
 
 
 ## Note
