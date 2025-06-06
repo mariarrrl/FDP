@@ -46,9 +46,7 @@ Due to GitHub's file size restrictions, the `.tif` files have been uploaded exte
 
 ---
 
-## Citation
 
-Please cite the original sources (e.g., GCAM, ETCCDI, Weiss et al.) as referenced in the main thesis or supplementary materials.
 
 
 
