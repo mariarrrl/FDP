@@ -33,7 +33,7 @@ rf_model <- train(presence ~ .,
 # save it
 saveRDS(rf_model, "/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/modelo_rf_final.rds")
 
-cat("✅ Modelo RF guardado como 'modelo_rf_final.rds'\n")
+cat(" Modelo RF guardado como 'modelo_rf_final.rds'\n")
 
 # Print model summary
 print(rf_model)
@@ -111,7 +111,7 @@ plot(st_geometry(world), add = TRUE, border = "white", lwd = 0.2, col = NA)
 
 dev.off()
 
-cat("\n✅ Mapa de predicción con Random Forest exportado correctamente\n")
+cat("\n Mapa de predicción con Random Forest exportado correctamente\n")
 
 ```
 ```{r}
