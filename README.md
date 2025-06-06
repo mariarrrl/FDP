@@ -11,7 +11,7 @@ The analysis combines environmental, climatic, and anthropogenic predictors usin
 - Input data: Presence records of illegal mammal hunting, pseudo-absences, and globally harmonized raster layers.
 
 ## Repository Structure
-´´´
+```
 ├── data/
 │ ├── dataset_modelo_all.csv # Model training data
 │ └── redlist_species_data/ # IUCN primate ranges (.shp hosted externally)
@@ -25,7 +25,7 @@ The analysis combines environmental, climatic, and anthropogenic predictors usin
 │ ├── random_forest.Rmd # Full model workflow
 │ ├── modelo_rf_final.rds # Trained Random Forest model
 │ └── riesgo_caza_rf_filtrado.tif # Final prediction raster
-´´´
+```
 
 
 ## How to Reproduce
