@@ -1,40 +1,54 @@
-# Variables Directory
+# variables/
 
-This directory is intended to store the geospatial datasets used in this project. These datasets are essential for the analysis but have not been uploaded directly to this GitHub repository due to their large file size (each file is several hundred MB or more). GitHub has a file size limit, and large binary files are generally not suitable for version control here.
+This directory contains all geospatial raster predictors used to train and project the Random Forest model for illegal primate hunting risk.  
+Due to GitHub's file size restrictions, the `.tif` files have been uploaded externally and can be accessed via the link below.
 
-To ensure the project remains accessible and reproducible, all required `.tif` files have been uploaded to a public Google Drive folder. You can download them using the link provided below.
+**Download full folder:**  
+[Google Drive – Raster Predictors](https://drive.google.com/drive/folders/13ENit3NzjQ8nZb11pIet4NIscoZD0vE1?usp=share_link)
 
-## How to Use
+---
 
-Download the variables directory from the Google Drive links provided below.
+## Contents and Description
 
-https://drive.google.com/drive/folders/13ENit3NzjQ8nZb11pIet4NIscoZD0vE1?usp=share_link
+### 1. `LU_change/`
+**File:** `tree_PFT_sum_2020.tif`  
+- Tree canopy coverage derived from GCAM/SSP4 downscaled land-use data.  
+- Represents the total percentage of vegetative tree cover per 1-km grid cell in 2020.  
+- Used as a proxy for habitat density and accessibility.
 
-## LU_change
+---
 
-Contains land use and vegetation type data. Represents the summed tree Plant Functional Types (PFT) for the year 2020.
+### 2. `climate_extremes/`
+**Files:**
+- `Media_Decennale_txnETCCDI_2015_2024.tif`  
+  – Decadal average of extreme minimum temperature (txn).  
+- `Media_Decennale_cddETCCDI_2015_2024.tif`  
+  – Decadal average of consecutive dry days (cdd).
 
-File:
-- tree_PFT_sum_2020.tif  
+> Both datasets were derived from the ETCCDI climate indices and resampled to match model resolution.  
+> They capture local climatic stress that may influence primate habitat and human activity.
+
+---
+
+### 3. `travel_time/`
+**File:** `Accessibility2015.tif`  
+- Estimated travel time to the nearest urban center with >50,000 inhabitants.  
+- Originally developed by Weiss et al. (2018).  
+- Used as a proxy for market access and anthropogenic pressure.
+
+---
+
+## Usage Notes
+
+- All rasters were resampled and reprojected to a common 1-km resolution and CRS prior to stacking.
+- File naming conventions align with variable names used in the model training script (`random_forest.Rmd`).
+- These layers are stacked and passed to the RF model using the same order of predictors.
+
+---
+
+## Citation
+
+Please cite the original sources (e.g., GCAM, ETCCDI, Weiss et al.) as referenced in the main thesis or supplementary materials.
 
 
-## climate_extremes
-
-Contains climate extreme indicators derived from ETCCDI datasets.
-
-Files:
-- cMedia_Decennale_cddETCCDI_2015_2024.tif: Decadal average of consecutive dry days.
-- Media_Decennale_txnETCCDI_2015_2024.tif: Decadal average of minimum daily maximum temperature.
-
-
-## travel_time
-
-Contains data on geographic accessibility. Represents estimated travel time to the nearest city (in minutes) for the year 2015.
-
-File:
-- Accessibility2015.tif  
-
-
-
-## Note
 
