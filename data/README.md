@@ -28,7 +28,7 @@ Purpose:
 Due to GitHub file size limitations, the full shapefile containing IUCN primate species distribution ranges is hosted externally.  
 You can download it directly from the following Google Drive link:
 
-[Download shapefile from Google Drive](https://drive.google.com/drive/folders/12v32ctX-P9l-fV5P1VM1j9vdchSndkYD?usp=sharing)
+[.shp](https://drive.google.com/drive/folders/12v32ctX-P9l-fV5P1VM1j9vdchSndkYD?usp=sharing)
 
 It was originally sourced from the IUCN Red List Spatial Data portal.
 
