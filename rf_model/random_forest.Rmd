@@ -1,166 +1,135 @@
 ---
-title: "random_forest"
-output: html_document
-date: "2025-05-13"
+title: "Rf_model"
+author: "Maria Rodriguez Lopez"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    theme: united
 ---
 
-```{r}
-#Random Forest model to predict illegal primate hunting (comparable with GLM)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(here)
+```
 
+# 1. Load Required Libraries
+
+```{r}
 library(randomForest)
 library(caret)
 library(pROC)
-
-# Load dataset
-data <- read.csv('/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/dataset_modelo_all.csv')
-
-# Select and clean relevant variables
-modelo_data_rf <- data[, c("presence", "tree_cover", "travel_time", "txn_temp_min_extreme", "cdd_dry_spells")]
-modelo_data_rf <- na.omit(modelo_data_rf)
-modelo_data_rf$presence <- factor(ifelse(modelo_data_rf$presence == 1, "presence", "absence"))
-
-# Define cross-validation strategy
-set.seed(123)
-control <- trainControl(method = "cv", number = 10, classProbs = TRUE, summaryFunction = twoClassSummary)
-
-# Train Random Forest model
-rf_model <- train(presence ~ ., 
-                  data = modelo_data_rf,
-                  method = "rf",
-                  trControl = control,
-                  metric = "ROC",
-                  importance = TRUE)
-# save it
-saveRDS(rf_model, "/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/modelo_rf_final.rds")
-
-cat(" Modelo RF guardado como 'modelo_rf_final.rds'\n")
-
-# Print model summary
-print(rf_model)
-
-# Variable importance
-varImpPlot(rf_model$finalModel, main = "Variable Importance - Random Forest")
-
-# Predict probabilities on full dataset (for ROC)
-pred_rf <- predict(rf_model, newdata = modelo_data_rf, type = "prob")
-roc_rf <- roc(response = modelo_data_rf$presence, predictor = pred_rf$presence)
-
-# Plot ROC curve
-plot(roc_rf, main = "ROC Curve - Random Forest")
-cat("\nAUC (Random Forest):", auc(roc_rf), "\n")
-```
-
-```{r}
-# Predict illegal primate hunting probability using Random Forest
-# (based on the final trained RF model)
 library(raster)
-library(caret)
-library(randomForest)
 library(viridis)
 library(sf)
 library(rnaturalearth)
 library(rnaturalearthdata)
+library(ggplot2)
+library(patchwork)
+library(dplyr)
+```
 
-# Load trained model (make sure you have saved it first with saveRDS)
-rf_model <- readRDS("/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/modelo_rf_final.rds")
+# 2. Load and Prepare Dataset
 
-# Load predictive raster layers
-r_tree_cover <- raster("/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/variables/LU_change/tree_PFT_sum_2020.tif")
-r_travel_time <- raster("/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/variables/travel_time/Accessibility2015.tif")
-r_txn <- raster("/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/variables/climate_extremes/Media_Decennale_txnETCCDI_2015_2024.tif")
-r_cdd <- raster("/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/variables/climate_extremes/Media_Decennale_cddETCCDI_2015_2024.tif")
+```{r}
+data <- read.csv(here("data", "dataset_modelo_all.csv"))
+modelo_data_rf <- data %>%
+  select(presence, tree_cover, travel_time, txn_temp_min_extreme, cdd_dry_spells) %>%
+  na.omit() %>%
+  mutate(presence = factor(ifelse(presence == 1, "presence", "absence")))
+```
 
-# Ensure all layers have the same resolution and extent
+# 3. Train Random Forest Model
+
+```{r}
+set.seed(123)
+control <- trainControl(method = "cv", number = 10,
+                        classProbs = TRUE, summaryFunction = twoClassSummary)
+
+rf_model <- train(presence ~ ., data = modelo_data_rf,
+                  method = "rf", trControl = control, metric = "ROC", importance = TRUE)
+
+saveRDS(rf_model, here("models", "modelo_rf_final.rds"))
+print(rf_model)
+varImpPlot(rf_model$finalModel, main = "Variable Importance - Random Forest")
+
+pred_rf <- predict(rf_model, newdata = modelo_data_rf, type = "prob")
+roc_rf <- roc(response = modelo_data_rf$presence, predictor = pred_rf$presence)
+plot(roc_rf, main = "ROC Curve - Random Forest")
+cat("AUC (Random Forest):", auc(roc_rf), "\n")
+```
+
+# 4. Spatial Prediction
+
+```{r}
+rf_model <- readRDS(here("models", "modelo_rf_final.rds"))
+
+r_tree_cover <- raster(here("data", "tree_PFT_sum_2020.tif"))
+r_travel_time <- raster(here("data", "Accessibility2015.tif"))
+r_txn <- raster(here("data", "Media_Decennale_txnETCCDI_2015_2024.tif"))
+r_cdd <- raster(here("data", "Media_Decennale_cddETCCDI_2015_2024.tif"))
+
 ref_raster <- r_tree_cover
 r_travel_time <- resample(r_travel_time, ref_raster)
 r_txn <- resample(r_txn, ref_raster)
 r_cdd <- resample(r_cdd, ref_raster)
 
-# Stacking layers
 stack_rf <- stack(r_tree_cover, r_travel_time, r_txn, r_cdd)
 names(stack_rf) <- c("tree_cover", "travel_time", "txn_temp_min_extreme", "cdd_dry_spells")
 
-# Predicting with the Random Forest model
-pred_rf <- raster::predict(stack_rf, rf_model, type = "prob", index = 2)  # index=2 = clase "presence"
+pred_rf <- raster::predict(stack_rf, rf_model, type = "prob", index = 2)
 
-# Load primate distribution shapefile
-primates_range <- st_read("/Users/mariarodriguezlopez/Desktop/redlist_species_data_820e596f-046b-4cf4-927d-6fbae858a0f8/data_0.shp")
+primates_range <- st_read(here("data", "primate_distribution.shp"))
 primates_range <- st_transform(primates_range, crs(pred_rf))
 
-# Crop and mask
 pred_rf_crop <- crop(pred_rf, extent(primates_range))
 pred_rf_mask <- mask(pred_rf_crop, primates_range)
 
-# save final raster
-writeRaster(pred_rf_mask, "/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/riesgo_caza_rf_filtrado.tif", overwrite = TRUE)
+writeRaster(pred_rf_mask, here("outputs", "predicted_risk_rf.tif"), overwrite = TRUE)
 
-# Graph
-png("/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/Figure_RF_Predicted_Map.png", width = 3000, height = 1800, res = 300)
-
+png(here("outputs", "Figure_RF_Predicted_Map.png"), width = 3000, height = 1800, res = 300)
 world <- ne_countries(scale = "medium", returnclass = "sf")
 plot(st_geometry(world), col = "grey90", border = "white", lwd = 0.2,
      main = "Final Predicted Risk (Random Forest)", bg = "white", axes = FALSE)
-plot(pred_rf_mask,
-     col = viridis(100, direction = -1),
-     zlim = c(0, 1),
-     add = TRUE,
+plot(pred_rf_mask, col = viridis(100, direction = -1), zlim = c(0, 1), add = TRUE,
      legend.args = list(text = "Risk Probability", side = 4, line = 2.5, cex = 0.8),
-     axes = FALSE,
-     box = FALSE)
+     axes = FALSE, box = FALSE)
 plot(st_geometry(world), add = TRUE, border = "white", lwd = 0.2, col = NA)
-
 dev.off()
-
-cat("\n Mapa de predicción con Random Forest exportado correctamente\n")
-
 ```
+
+# 5. ROC Comparison: GLM vs RF
+
 ```{r}
-# Compare GLM vs. RF: ROC and sensitivity/specificity bars
-library(caret)
-library(pROC)
-library(ggplot2)
-library(dplyr)
-
-# load datset
-data_glm <- read.csv("/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/dataset_modelo_all.csv")
-data_rf <- data_glm  # Es el mismo dataset que usaste para RF
-
-# preprocessing to omit na and control the presence
+data_glm <- read.csv(here("data", "dataset_modelo_all.csv"))
 data_glm <- na.omit(data_glm[, c("presence", "tree_cover", "travel_time", "txn_temp_min_extreme", "cdd_dry_spells")])
 data_glm$presence <- factor(ifelse(data_glm$presence == 1, "presence", "absence"))
 
-# laod models
-glm_model <- readRDS("/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/modelo_glm_all_step.rds")
-rf_model <- readRDS("/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/modelo_rf_final.rds")
+glm_model <- readRDS(here("models", "modelo_glm_all_step.rds"))
+rf_model <- readRDS(here("models", "modelo_rf_final.rds"))
 
-# obtain probabilities
 prob_glm <- predict(glm_model, newdata = data_glm, type = "response")
 prob_rf <- predict(rf_model, newdata = data_glm, type = "prob")
 
-# create ROC curves
 roc_glm <- roc(data_glm$presence, prob_glm)
 roc_rf <- roc(data_glm$presence, prob_rf$presence)
 
-# comparative graph of ROC curve
-png("/Users/mariarodriguezlopez/Desktop/nuevo_dataset/files_uso/final/Figure_ROC_Comparison.png", width = 2500, height = 1800, res = 300)
+png(here("outputs", "Figure_ROC_Comparison.png"), width = 2500, height = 1800, res = 300)
 plot(roc_glm, col = "blue", legacy.axes = TRUE, main = "ROC Curve Comparison", lwd = 3)
 lines(roc_rf, col = "red", lwd = 3)
 legend("bottomright", legend = c("GLM (AUC = 0.693)", "RF (AUC = 0.980)"),
        col = c("blue", "red"), lwd = 3)
 dev.off()
-
-
 ```
+
+# 6. Variable Distribution Analysis
+
 ```{r}
-library(ggplot2)
-
-# ensure the class is a factor
 modelo_data_rf$presence <- as.factor(modelo_data_rf$presence)
-
-# list of predictors
 vars <- c("tree_cover", "travel_time", "txn_temp_min_extreme", "cdd_dry_spells")
 
-# create a boxplot for each variable
 for (v in vars) {
   p <- ggplot(modelo_data_rf, aes_string(x = "presence", y = v, fill = "presence")) +
     geom_boxplot(outlier.shape = NA, alpha = 0.7) +
@@ -168,62 +137,13 @@ for (v in vars) {
          x = "Illegal Hunting Presence", y = v) +
     theme_minimal() +
     theme(legend.position = "none")
-
   print(p)
 }
-
 ```
 
+# 7. Enhanced Boxplots with Means and Trends
 
 ```{r}
-library(ggplot2)
-library(patchwork)
-
-#ensure presence is a factor
-modelo_data_rf$presence <- as.factor(modelo_data_rf$presence)
-
-# create the graphics each one separate
-p1 <- ggplot(modelo_data_rf, aes(x = presence, y = tree_cover, fill = presence)) +
-  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
-  labs(title = "Tree Cover", x = "", y = "Tree Cover (%)") +
-  theme_minimal() + theme(legend.position = "none")
-
-p2 <- ggplot(modelo_data_rf, aes(x = presence, y = travel_time, fill = presence)) +
-  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
-  labs(title = "Travel Time", x = "", y = "Minutes to City") +
-  theme_minimal() + theme(legend.position = "none")
-
-p3 <- ggplot(modelo_data_rf, aes(x = presence, y = txn_temp_min_extreme, fill = presence)) +
-  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
-  labs(title = "Min Temperature", x = "", y = "°C") +
-  theme_minimal() + theme(legend.position = "none")
-
-p4 <- ggplot(modelo_data_rf, aes(x = presence, y = cdd_dry_spells, fill = presence)) +
-  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
-  labs(title = "Consecutive Dry Days", x = "", y = "Days") +
-  theme_minimal() + theme(legend.position = "none")
-
-# combine all the plots together
-combined_plot <- (p1 | p2) / (p3 | p4)
-
-# see the plots
-print(combined_plot)
-
-# save the plots
-ggsave("/Users/mariarodriguezlopez/Desktop/boxplots_variables_rf.png", combined_plot, width = 12, height = 8)
-
-```
-
-
-```{r}
-library(ggplot2)
-library(patchwork)
-library(dplyr)
-
-# ensure presence is a factor
-modelo_data_rf$presence <- as.factor(modelo_data_rf$presence)
-
-# create the plot with the mean and the line that connects both plots
 box_with_line <- function(var, title, y_label) {
   df <- modelo_data_rf[!is.na(modelo_data_rf[[var]]), ]
 
@@ -234,11 +154,9 @@ box_with_line <- function(var, title, y_label) {
 
   ggplot(df, aes_string(x = "presence", y = var, fill = "presence")) +
     geom_boxplot(width = 0.5, outlier.shape = NA, alpha = 0.8, color = "grey30") +
-    geom_line(data = summary_data,
-              aes(x = x_pos, y = mean_value, group = 1),
+    geom_line(data = summary_data, aes(x = x_pos, y = mean_value, group = 1),
               linewidth = 1, color = "black", inherit.aes = FALSE) +
-    geom_point(data = summary_data,
-               aes(x = x_pos, y = mean_value),
+    geom_point(data = summary_data, aes(x = x_pos, y = mean_value),
                color = "darkred", size = 3, inherit.aes = FALSE) +
     scale_fill_manual(values = c("absence" = "#D7EAF3", "presence" = "#FFD3C2")) +
     scale_x_discrete(labels = c("absence" = "Pseudo-absence", "presence" = "Presence")) +
@@ -249,31 +167,13 @@ box_with_line <- function(var, title, y_label) {
           axis.title = element_text(size = 11))
 }
 
-# create the plots with the title
 p1 <- box_with_line("tree_cover", "Tree Cover", "Tree Cover (%)")
 p2 <- box_with_line("travel_time", "Travel Time to Urban Areas", "Minutes")
 p3 <- box_with_line("txn_temp_min_extreme", "Extreme Minimum Temperature", "°C")
 p4 <- box_with_line("cdd_dry_spells", "Consecutive Dry Days", "Days")
 
-# Combinar en grid limpio
 combined_plot <- (p1 | p2) / (p3 | p4)
-
-# show the plot
 print(combined_plot)
-
-# save
-ggsave("/Users/mariarodriguezlopez/Desktop/boxplots_rf_limpios.png", combined_plot, width = 12, height = 8)
-
-
-
-#The red dot represents: The mean (average) value of the variable for each group:
-#Pseudo-absence (no confirmed primate hunting)
-#Presence (confirmed illegal primate hunting)
-#The black line connects the two mean points:
-#It shows the general trend of change between the groups.
-#-If the line goes up, it indicates that the mean value is higher when hunting is present.
-#-If the line goes down, it indicates that the mean value is lower when hunting is present.
+ggsave(here("outputs", "boxplots_rf_limpios.png"), combined_plot, width = 12, height = 8)
 ```
-
-
 
