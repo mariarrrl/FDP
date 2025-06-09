@@ -30,7 +30,7 @@ The workflow relies on the following R packages:
 ## How to Reproduce
 
 1. **Download and prepare input data:**
-   - Load the main dataset `dataset_modelo_all.csv` from the `/data/` directory.
+   - Load the main dataset `dataset_modelo_all.csv` from the `/data/` directory in this github repository.
    - Download the predictive raster variables from the following google drive link directory: [`/variables/` ](https://drive.google.com/drive/folders/13ENit3NzjQ8nZb11pIet4NIscoZD0vE1?usp=share_link) (hosted externally due to file size)
    - Download and load the IUCN primate distribution shapefile  [`/.shp/`](https://drive.google.com/drive/folders/12v32ctX-P9l-fV5P1VM1j9vdchSndkYD?usp=sharing)(hosted externally due to file size).
 
@@ -40,11 +40,6 @@ The workflow relies on the following R packages:
    - Predict spatial hunting risk using the stacked raster variables.
    - Apply the IUCN shapefile to crop and mask the risk output.
    - Export the final risk prediction raster (`riesgo_caza_rf_filtrado.tif`).
-
-3. **Optional:**
-   - Compare RF performance with the GLM model (AUC, ROC curves).
-   - Generate visualizations of variable distributions and model importance.
-
 
 ## Notes
 
