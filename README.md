@@ -35,7 +35,7 @@ The analysis combines environmental, climatic, and anthropogenic predictors usin
    - Raster predictors from the following Google Drive folder:  
      [Raster Variables](https://drive.google.com/drive/folders/13ENit3NzjQ8nZb11pIet4NIscoZD0vE1?usp=share_link)
    - IUCN primate distribution shapefile from:
-     - [.shp]https://drive.google.com/drive/folders/12v32ctX-P9l-fV5P1VM1j9vdchSndkYD?usp=sharing
+     - [/.shp/](https://drive.google.com/drive/folders/12v32ctX-P9l-fV5P1VM1j9vdchSndkYD?usp=sharing)
 
 2. Run `random_forest.Rmd` to:
    - Train or load the RF model
