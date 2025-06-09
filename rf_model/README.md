@@ -32,7 +32,7 @@ The workflow relies on the following R packages:
 1. **Download and prepare input data:**
    - Load the main dataset `dataset_modelo_all.csv` from the `/data/` directory.
    - Download the predictive raster variables from the following google drive link directory: [`/variables/` ](https://drive.google.com/drive/folders/13ENit3NzjQ8nZb11pIet4NIscoZD0vE1?usp=share_link) (hosted externally due to file size)
-   - Download and load the IUCN primate distribution shapefile as explained in the [`/.shp/`](https://drive.google.com/drive/folders/12v32ctX-P9l-fV5P1VM1j9vdchSndkYD?usp=sharing) directory (hosted externally due to file size).
+   - Download and load the IUCN primate distribution shapefile  [`/.shp/`](https://drive.google.com/drive/folders/12v32ctX-P9l-fV5P1VM1j9vdchSndkYD?usp=sharing)(hosted externally due to file size).
 
 2. **Run the `random_forest.Rmd` script:**
    - Preprocess and clean the input data.
