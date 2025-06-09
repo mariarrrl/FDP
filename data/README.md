@@ -32,12 +32,6 @@ You can download it directly from the following Google Drive link:
 
 It was originally sourced from the IUCN Red List Spatial Data portal.
 
-## Reproducibility
-
-1. Load `dataset_modelo_all.csv` in your R environment.
-2. Refer to the preprocessing steps and model training code in `rf_model/` scripts.
-3. Apply spatial filters using the Red List shapefile to mask outputs to tropical primate range only.
-
 
 
 
