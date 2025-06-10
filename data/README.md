@@ -1,4 +1,4 @@
-# data/
+# data
 
 This folder contains all datasets used in model training, evaluation, and supporting spatial analysis for predicting illegal primate hunting risk.
 
