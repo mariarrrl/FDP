@@ -1,4 +1,4 @@
-# rf_model/
+# rf_model
 
 This folder contains all materials related to the training, evaluation, and spatial prediction of illegal primate hunting risk using the Random Forest (RF) classifier.
 
