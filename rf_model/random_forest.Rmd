@@ -50,7 +50,12 @@ roc_rf <- roc(response = modelo_data_rf$presence, predictor = pred_rf$presence)
 plot(roc_rf, main = "ROC Curve - Random Forest")
 cat("AUC (Random Forest):", auc(roc_rf), "\n")
 ```
+```{r}
+#see best mtry and plot
+print(rf_model$bestTune) 
+plot(rf_model)            
 
+```
 # 4. Spatial Prediction
 
 ```{r}
