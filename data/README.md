@@ -19,10 +19,6 @@ Used in:
 ## redlist_species_data_.../
 
 This folder contains species distribution data derived from the IUCN Red List.
-
-Purpose:
-- Used to define the spatial extent of the analysis (global primate range).
-- The shapefile (.shp) was too large to upload to GitHub.
 - The data was used to spatially constrain predictions to regions where primates are naturally present.
  
 Due to GitHub file size limitations, the full shapefile containing IUCN primate species distribution ranges is hosted externally.  
