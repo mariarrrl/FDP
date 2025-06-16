@@ -35,11 +35,7 @@ The workflow relies on the following R packages:
    - Download and load the IUCN primate distribution shapefile  [`/.shp/`](https://drive.google.com/drive/folders/12v32ctX-P9l-fV5P1VM1j9vdchSndkYD?usp=sharing)(hosted externally due to file size).
 
 2. **Run the `random_forest.Rmd` script:**
-   - Preprocess and clean the input data.
-   - Train the Random Forest model using 10-fold cross-validation or load the existing model (`modelo_rf_final.rds`).
-   - Predict spatial hunting risk using the stacked raster variables.
-   - Apply the IUCN shapefile to crop and mask the risk output.
-   - Export the final risk prediction raster (`riesgo_caza_rf_filtrado.tif`).
+
 
 ## Notes
 
