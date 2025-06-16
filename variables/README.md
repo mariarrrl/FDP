@@ -1,4 +1,4 @@
-# variables/
+# variables
 
 This directory contains all geospatial raster predictors used to train and project the Random Forest model for illegal primate hunting risk.  
 Due to GitHub's file size restrictions, the `.tif` files have been uploaded externally and can be accessed via the link below.
